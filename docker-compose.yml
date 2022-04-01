@@ -1,0 +1,33 @@
+version: "3.4"
+
+services:
+  app:
+    image: apimaxia:v1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    #    env_file:
+    #      .env
+    #    depends_on:
+    #      - redis
+    tty: true
+    stdin_open: true
+    ports:
+      - "3004:3000"
+    volumes:
+      - .:/app/apimaxia
+      - ../svida:/app/svida
+    environment:
+      RAILS_ENV: development
+#      REDIS_HOST: redis
+
+#  db:
+#    image: postgres
+#    restart: always
+#    ports:
+#      - "5433:5432"
+#    environment:
+#      POSTGRES_PASSWORD: Sws@82558237
+
+#  redis:
+#    imag

@@ -1,0 +1,2 @@
+class DrupalEscolaDisciplina < ApplicationRecord
+end

@@ -1,0 +1,2 @@
+class JobProtocolo < ApplicationRecord
+end

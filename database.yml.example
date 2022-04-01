@@ -1,0 +1,42 @@
+default: &default
+  adapter: postgresql
+  pool: 5
+  timeout: 5000
+
+development:
+  <<: *default
+  encoding: unicode
+  username: postgres
+  ### LOCALHOST
+  # database: svida3
+  # password: swss
+  # host: 172.17.0.2
+  ######
+  ### TESTE
+  database: svida2
+  password: Sws@82558237
+  host: 167.99.8.185
+  # host: 179.185.47.243 # vivo
+  # host: 189.112.126.116 # algar
+  # host: 192.168.1.12 # interno
+  #####
+  ### PROD
+  # database: svida
+  # host: vidaeducacao.com.br
+  # password: Sws@82558237
+  ######
+test:
+  <<: *default
+  ### LOCALHOST
+  username: postgres
+  database: svida3
+  password: swss
+  host: 172.17.0.2
+
+production:
+  <<: *default
+  encoding: unicode
+  username: postgres
+  database: svida2
+  password: swss
+  host: localhost

@@ -1,0 +1,294 @@
+---
+openapi: 3.0.1
+info:
+  title: API V1
+  version: v1.0
+paths:
+  "/api/v1/users/sign_in":
+    get:
+      summary: login user/return token
+      parameters:
+      - in: query
+        name: user
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+      responses:
+        '200':
+          description: successful
+        '401':
+          description: unauthorized
+        '500':
+          description: error
+  "/api/v1/managers":
+    post:
+      summary: Migrate main school
+      requestBody:
+        description: |
+          Migrar dados da sede/escola para seguintes categorias:
+            - Aluno(a), Professor(a), Diretor(a), Diretor Pedagógico, Coordernador(a), Coordenador Pedagógico, Coordenador de Área, Administrativo, Supervisor(a), Mantenedor, Supervisor Pedagógico, Pais/Responsáveis e Psicólogos.
+
+          Regras de negócio:
+            - Tag "in_swagger" obrigátoria:
+                - Use-a como true para validar somente o schema json.
+                - Use-a como false na integração da migração assim a api irá realizar os devidos inserts  na base de dados.
+
+            - Tag "matricula" para categoria Aluno(a) caso não infomrada sistema irá gerar randômica, para as demais será aceito valores em branco.
+
+            - Tag "categoria":
+              - Aluno(a): permitido somente um nível, campos obrigátorios: nível, série, turma e turno.
+              - Professor(a): pode conter mais de um nivel, campos obrigátorios: nivel, série, turma, turno e disciplina.
+              - Coordernador(a), Coordenador Pedagógico, Coordenador de Área: necessário informa apenas nivel e a série.
+              - Demais categorias essa tag niveis é desconsiderada.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/sede'
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: successful
+        '401':
+          description: unauthorized
+        '500':
+          description: error
+  "/api/v1/evalution_inspections":
+    post:
+      summary: evaluation inspection log
+      requestBody:
+        description: |
+            - Tag "in_swagger": true for validate only json and false for submit post      
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/avaliacao_fiscalizacao'
+          text/plain:
+            schema:
+              type: string      
+      responses:
+        '200':
+          description: successful
+        '401':
+          description: unauthorized
+        '500':
+          description: error                    
+components:
+  schemas:
+    sede:
+      type: object
+      required:
+      - sede
+      - nome_estado
+      - municipio
+      - in_swagger
+      - pessoas
+      properties:
+        sede:
+          type: string
+          example: ESCOLA TESTE
+          minLength: 1
+        nome_estado:
+          type: string
+          example: ALAGOAS
+          minLength: 1
+        municipio:
+          $ref: '#/components/schemas/municipio'
+        pessoas:
+          $ref: '#/components/schemas/pessoas'
+        in_swagger:
+          type: boolean
+          example: true
+          minLength: 1
+    municipio:
+      type: object
+      required:
+      - nome
+      - codigo_ibge
+      properties:
+        nome:
+          type: string
+          example: ARAPIRACA
+          minLength: 1
+        codigo_ibge:
+          type: string
+          example: '27003000'
+          minLength: 1
+        nome_distrito:
+          type: string
+          example: ""
+    pessoas:
+      type: array
+      items:
+        type: object
+        required:
+          - nome
+          - matricula
+          - categoria
+        properties:
+          nome:
+            type: string
+            nullable: false
+            minLength: 1
+          cpf:
+            type: string
+          sexo:
+            type: string
+            enum: [MASCULINO, FEMININO]
+          email:
+            type: string
+          data_nascimento:
+            type: string
+            format: date
+          matricula:
+            type: string
+            nullable: false
+          categoria:
+            type: string
+            enum: [Aluno(a), Professor(a), Diretor(a), Diretor Pedagógico, Coordernador(a), Coordenador Pedagógico, Coordenador de Área, Administrativo, Supervisor(a), Mantenedor, Supervisor Pedagógico, Pais/Responsáveis, Psicólogos]
+            minLength: 1
+          niveis:
+            $ref: '#/components/schemas/niveis'
+      example:
+        - nome: ALUNA TESTE
+          cpf: ""
+          sexo: FEMININO
+          email: ""
+          data_nascimento: '2005-03-23'
+          matricula: ""
+          categoria: Aluno(a)
+          niveis: [
+            {
+              nivel: Ensino_Médio,
+              serie: 1ª série,
+              turma: U,
+              turno: Manhã
+            }
+          ]
+        - nome: COORDENADOR TESTE
+          cpf: 096.524.254-42
+          sexo: MASCULINO
+          email: "coordenador.teste@gmail.com"
+          data_nascimento: ""
+          matricula: ""
+          categoria: Coordenador(a)
+          niveis: [
+            {
+              nivel: Ensino_Médio,
+              serie: 1ª série
+            },
+            {
+              nivel: Ensino_Fundamental_1,
+              serie: 2ª ano
+            }
+          ]
+        - nome: PROFESSOR TESTE
+          cpf: 056.475.214-21
+          sexo: MASCULINO
+          email: professor.teste@gmail
+          data_nascimento: '2005-03-23'
+          matricula: ""
+          categoria: Profressor(a)
+          niveis: [
+            {
+              nivel: Ensino_Médio,
+              serie: 1ª série,
+              turma: U,
+              turno: Manhã,
+              disciplina: GEOGRAFIA
+
+            },
+            {
+              nivel: Ensino_Médio,
+              serie: "2ª série",
+              turma: U,
+              turno: Manhã,
+              disciplina: GEOGRAFIA
+            },
+            {
+              nivel: Ensino_Fundamental_2,
+              serie: 9º ano,
+              turma: U,
+              turno: Manhã,
+              disciplina: GEOGRAFIA
+            }
+          ]
+        - nome: PSICÓLOGO TESTE
+          cpf: ""
+          sexo: ""
+          email: ""
+          data_nascimento: ""
+          matricula: ""
+          categoria: Psicólogos
+    niveis:
+      type: array
+      items:
+        type: object
+        properties:
+          nivel:
+            type: string
+            nullable: false
+            minLength: 1
+            enum: [Ensino_Fundamental_1, Ensino_Fundamental_2, Ensino_Infantil, Ensino_Médio, Pré_Vestibular]
+          serie:
+            type: string
+            nullable: false
+            minLength: 1
+            enum: [INFANTIL I, INFANTIL II, INFANTIL III, INFANTIL IV, INFANTIL V, 1º ano, 2º ano, 3º ano', 4º ano, 5º ano, 6º ano, 7º ano, 8º ano, 9º ano, 1ª série, 2ª série, 3ª série, Pré Universitário, Pré Universitário Intensivo]
+          truma:
+            type: string
+          turno:
+            type: string
+            nullable: false
+            minLength: 1
+            enum: [Manhã, Tarde, Noite, Integral]
+      example:
+        - nivel: Ensino_Médio
+        - serie: 1ª série
+        - turma: U,
+        - turno: Manhã
+    avaliacao_fiscalizacao:
+      type: object
+      required:
+      - turma_avaliacao_id
+      - turma_aluno_id
+      - tipo_registro   
+      - in_swagger 
+      properties:
+        turma_avaliacao_id:
+          type: integer
+          example: 12134
+          minLength: 1
+        turma_aluno_id:
+          type: integer
+          example: 435654645
+          minLength: 1  
+        tipo_registro:
+          type: string
+          enum: [SAIDA, ENTRADA]    
+        in_swagger:
+          type: boolean
+          example: true
+          minLength: 1                    
+  securitySchemes:
+    apiKeyToken:
+      type: apiKey
+      in: header
+      name: X-Entity-Token
+    apikeyEmail:
+      type: apiKey
+      in: header
+      name: X-Entity-Email
+security:
+  - apiKeyToken: []
+    apikeyEmail: []
